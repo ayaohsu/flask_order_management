@@ -1,26 +1,14 @@
-class User:
-    def __init__(self, id, username, password):
+from flask_login import UserMixin
+
+class User(UserMixin):
+
+    def __init__(self, id):
         self.id = id
-        self.username = username
-        self.password = password
-        self.is_authenticated = False
-        self.is_active = True
-        self.is_anonymous = False
-    
-    def get_id(self):
-        return self.id
-    
-    def get_user_by_id(self, id):
-        if id == 1:
-            self.id = 1
-            self.username = 'admin'
-            self.password = 'apass'
-            return self
-        elif id == 2:
-            self.id = 2
-            self.username = 'customer'
-            self.password = 'bpass'
-            return self
-        else:
-            return None
+        self.name = "name"
+        self.password = "password"
         
+    def __repr__(self):
+        return f"User[id={self.id}][name={self.name}]"
+
+def get_user_by_id(id):
+    return User(id)
