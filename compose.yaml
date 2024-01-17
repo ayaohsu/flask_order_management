@@ -1,5 +1,5 @@
 services:
-  web: 
+  service: 
     build:
       context: app
       target: builder
@@ -9,10 +9,14 @@ services:
 
   db:
     image: postgres
-    restart: always
     ports:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: postgres_password
       POSTGRES_USER: postgres_user
-      POSTGRES_DB: order_management
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
