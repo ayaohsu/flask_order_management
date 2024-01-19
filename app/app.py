@@ -29,7 +29,7 @@ def login():
         app.logger.info(f'Logged user in successfully [user={user}]')
         return Response('Logged in', status=201)
     else:
-         app.logger.info(f'Failed to log user in due to incorrect password [username={username}][password={password}]')
+         app.logger.info(f'Failed to log user in due to incorrect password [username={username}][input_password={password}]')
          return Response('Login failed', status=400)
 
 
@@ -45,7 +45,7 @@ def logout():
 @app.route('/place_order', methods=['POST'])
 @login_required
 def place_order():
-    app.logger.info('Placing order')
+    app.logger.info(f'Placing order for user {current_user}')
     return Response('Success', status=200)
 
 
