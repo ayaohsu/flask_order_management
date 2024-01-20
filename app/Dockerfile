@@ -8,4 +8,4 @@ RUN pip3 install -r requirements.txt
 COPY . /app
 
 ENTRYPOINT ["python3"]
-CMD ["run_server.py"]
+CMD ["src/run_server.py"]
