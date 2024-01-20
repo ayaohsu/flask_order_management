@@ -43,6 +43,19 @@ def edit_product():
         return Response('Failed to update product.', 500)
 
 
+@product_app.route('/product', methods=['DELETE'])
+@login_required
+def delete_product():
+    name = request.form['name']
+
+    current_app.logger.info(f"Received delete product request with [name={name}]")
+
+    if delete_product_from_db(name):
+        return Response('Product deleted.', 200)
+    else:
+        return Response('Failed to delete product.', 500)
+
+
 class Product:
 
     def __init__(self, id, name, price, stock):
@@ -126,3 +139,26 @@ def get_product_by_name(name):
     connection.close()
 
     return Product(product_record[0], product_record[1], product_record[2], product_record[3])
+
+def delete_product_from_db(name):
+    connection = psycopg2.connect(**db_config)
+
+    cursor = connection.cursor()
+    query_executed_successfully = True
+
+    try:
+        cursor.execute('''
+            DELETE FROM products
+            WHERE name=%s
+        ''',
+        (name,)
+        )
+        connection.commit()
+    except Exception as e:
+        current_app.logger.error(f"Failed to delete product from database. [exception={e}][name={name}]")
+        query_executed_successfully = False
+    finally:
+        cursor.close()
+        connection.close()
+
+    return query_executed_successfully
