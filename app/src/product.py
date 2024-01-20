@@ -2,12 +2,14 @@ from flask import Blueprint, current_app, Response, request
 from flask_login import login_required
 import psycopg2
 
+from auth import role_required
 from config import db_config
 
 product_app = Blueprint('product_app', __name__)
 
 @product_app.route('/create_product', methods=['POST'])
 @login_required
+@role_required('Manager')
 def create_product():
     name = request.form['name']
     price = request.form['price']
@@ -23,6 +25,7 @@ def create_product():
 
 @product_app.route('/edit_product', methods=['POST'])
 @login_required
+@role_required('Manager')
 def edit_product():
     name = request.form['name']
     price = float(request.form['price'])
@@ -45,6 +48,7 @@ def edit_product():
 
 @product_app.route('/product', methods=['DELETE'])
 @login_required
+@role_required('Manager')
 def delete_product():
     name = request.form['name']
 
@@ -55,6 +59,11 @@ def delete_product():
     else:
         return Response('Failed to delete product.', 500)
 
+@product_app.route('/product_list')
+def get_product_list():
+    products = get_all_products_from_db()
+    product_names = [ product.name for product in products ]
+    return product_names, 200
 
 class Product:
 
@@ -162,3 +171,25 @@ def delete_product_from_db(name):
         connection.close()
 
     return query_executed_successfully
+
+def get_all_products_from_db():
+    connection = psycopg2.connect(**db_config)
+
+    cursor = connection.cursor()
+
+    cursor.execute('''
+        SELECT id, name, price, stock
+        FROM products
+    ''')
+    connection.commit()
+
+    product_records = cursor.fetchall()
+    products = []
+
+    for product_record in product_records:
+        products.append(Product(*product_record))
+
+    cursor.close()
+    connection.close()
+
+    return products

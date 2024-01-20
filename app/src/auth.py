@@ -38,3 +38,14 @@ def logout():
 @login_manager.user_loader
 def load_user(user_id):
     return get_user_by_id(user_id)
+
+
+def role_required(role):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if current_user.role == role:
+                return func(*args, **kwargs)
+            else:
+                raise PermissionError(f'Access denied for role [role={current_user.role}]')
+        return wrapper
+    return decorator
