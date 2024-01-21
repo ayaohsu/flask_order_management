@@ -1,7 +1,7 @@
 from app import app
 
 from auth import auth_app
-from product import product_app
+from product_routes import product_app
 
 if __name__ == '__main__':
     app.register_blueprint(product_app)

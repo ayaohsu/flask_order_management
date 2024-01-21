@@ -1,80 +1,10 @@
-from flask import Blueprint, current_app, Response, request
-from flask_login import login_required, current_user
+from flask import current_app
 import psycopg2
 
-from auth import role_required
 from config import db_config
 
 LARGE_ENOUGH_PRICE = 1e+10
 LARGE_ENOUGH_STOCK = 1e+10
-
-product_app = Blueprint('product_app', __name__)
-
-
-@product_app.route('/create_product', methods=['POST'])
-@login_required
-@role_required('Manager')
-def create_product():
-    name = request.form['name']
-    price = request.form['price']
-    stock = request.form['stock']
-
-    current_app.logger.info(f"Received create product request with [name={name}][price={price}][stock={stock}]")
-    
-    if insert_product_to_db(name, price, stock):
-        return Response("Product created.", 201)
-    else:
-        return Response("Failed to create product since it exists already.", 400)
-
-
-@product_app.route('/edit_product', methods=['POST'])
-@login_required
-@role_required('Manager')
-def edit_product():
-    name = request.form['name']
-    price = float(request.form['price'])
-    stock = int(request.form['stock'])
-
-    current_app.logger.info(f"Received edit product request with [name={name}][price={price}][stock={stock}]")
-
-    product = get_product_by_name(name)
-    if product is None:
-        return Response("Product does not exist.", 400)
-    
-    product.price = price
-    product.stock = stock
-
-    if product.update_to_db():
-        return Response('Product updated.', 200)
-    else:
-        return Response('Failed to update product.', 500)
-
-
-@product_app.route('/product', methods=['DELETE'])
-@login_required
-@role_required('Manager')
-def delete_product():
-    name = request.form['name']
-
-    current_app.logger.info(f"Received delete product request with [name={name}]")
-
-    if delete_product_from_db(name):
-        return Response('Product deleted.', 200)
-    else:
-        return Response('Failed to delete product.', 500)
-
-@product_app.route('/product_list')
-def get_product_list():
-    products_query_parameters = {
-        'min_price': float(request.args.get('min-price')) if request.args.get('min-price') is not None else 0,
-        'max_price': float(request.args.get('max-price')) if request.args.get('max-price') is not None else LARGE_ENOUGH_PRICE,
-        'min_stock': int(request.args.get('min-stock')) if request.args.get('min-stock') is not None else 0,
-        'max_stock': int(request.args.get('max-stock')) if request.args.get('max-stock') is not None else LARGE_ENOUGH_STOCK,
-    }
-
-    products = get_products_from_db(products_query_parameters)
-    product_names = [ product.name for product in products ]
-    return product_names, 200
 
 class Product:
 
@@ -194,7 +124,12 @@ def get_products_from_db(query_parameters):
         WHERE price >= %(min_price)s AND price <= %(max_price)s
         AND stock >= %(min_stock)s AND stock <= %(max_stock)s
     ''',
-    query_parameters)
+    {
+        'min_price': float(query_parameters['min_price']) if query_parameters['min_price'] is not None else 0,
+        'max_price': float(query_parameters['max_price']) if query_parameters['max_price'] is not None else LARGE_ENOUGH_PRICE,
+        'min_stock': int(query_parameters['min_stock']) if query_parameters['min_stock'] is not None else 0,
+        'max_stock': int(query_parameters['max_stock']) if query_parameters['max_stock'] is not None else LARGE_ENOUGH_STOCK,
+    })
     connection.commit()
 
     product_records = cursor.fetchall()
