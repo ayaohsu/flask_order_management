@@ -4,7 +4,7 @@
 
 This is an implementation of a product and order management service, using Flask and PostgreSQL, containerized by Docker.
 
-I chose to use a SQL database (RDBMS) since mostly we are dealing with structured data here (products and orders). It also comes in handy with integrity constraints that RDBMS provides so less additional check is required at the application level.
+I chose to use a SQL database (RDBMS) since we are mostly dealing with structured data here (like products and orders). Also RDBMS supoprts integrity constraints so some of the checks can be implemented in the db level instead of needing to be addded in the application code.
 
 ### To Run the Service
 
@@ -56,12 +56,12 @@ The validation of the request parameters is not implemented yet - I haven't foun
 
 At this time, all requests are simply responded with status codes and messages. I know HTML documents could have been returned so it will be easier to test and play around. Redirecting can also be implemented to make the user experience better, in cases like login failure.
 
-In my opinion it is also a good idea to include some unit tests (perhaps with pytest) and some end-to-end tests to test the real-life use cases like login and logout, role-based access control, product life cycle, etc. 
+In my opinion it is also a good idea to include some unit tests (perhaps with pytest) and end-to-end tests for real-life scenarios like login / logout, role-based access control, product's full life cycle, etc. 
 
 ### Contact
 
-If there is any question, please do not hesitate to contact me.
-Thank you for your review!
+If there is any question, please do not hesitate to contact me.  
+Thank you for taking the time to review this!
 
 Yao Hsu  
 ayao780607@gmail.com
