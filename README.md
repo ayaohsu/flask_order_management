@@ -1,4 +1,4 @@
-# Online Test - API Implementation of Product and Order Management
+# Online Test - Product and Order Management Service
 
 ### Tech Stack
 
@@ -31,6 +31,13 @@ pip3 install -r requirements.txt
 python init_db.py
 ```
 
+5. I used a Postman client to send requests to the service. Please use these following credentials to log into and test the service:
+
+| Username    | Password |  Role  |
+| -------- | ------- | ------- |
+| manager01  | p@ss    | Manager  |
+| customer01  | w0rd    | Customer  |
+
 ### REST API Endpoints
 
 | Method    | URI |  Request Parameters  |
@@ -43,3 +50,9 @@ python init_db.py
 | GET  | `/product_list`    | fields (all are optional): `min-price`, `max-price`, `min-stock`, `max-stock` (query params)  |
 | POST  | `/create_order`    | key=product-name, value=order-quantity (form-data) |
 | GET  | `/order_list`    |  |
+
+
+### Notes
+
+The validation of the request parameters is not implemented yet due to the time constraints - I haven't found a good way to do this except for manually checking the data type and range. I suspect there should be a library to validate this easily. However, I have yet to find one.
+
