@@ -29,7 +29,7 @@ pip3 install -r requirements.txt
 python init_db.py
 ```
 
-5. I used a Postman client to send requests to the service. Please use these following credentials to log into and test the service:
+5. Please use the following credentials to log in and play with the service if you like (I personally use a Postman client to do this):
 
 | Username    | Password |  Role  |
 | -------- | ------- | ------- |
