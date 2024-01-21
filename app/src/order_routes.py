@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, Response, request
+from flask import Blueprint, current_app, request, jsonify
 from flask_login import login_required, current_user
 
 from auth import role_required
@@ -37,4 +37,12 @@ def create_order():
 @order_app.route('/order_list')
 @login_required
 def get_order_list():
-    pass
+    if current_user.role == 'Manager':
+        orders = Order.get_orders()
+    elif current_user.role == 'Customer':
+        orders = Order.get_orders(user_id=current_user.get_id())
+    else:
+        current_user.logger.error(f'Got user with unknown role when handling order_list request. [user={current_user}]')
+        return 'Failed to get order list.', 500
+
+    return jsonify([order.serialize() for order in orders]), 200
