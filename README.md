@@ -4,9 +4,7 @@
 
 This is an implementation of a product / order management service, using Flask and PostgreSQL, containerized by Docker.
 
-I chose to use a SQL database (RDBMS) since mostly we are dealing with structured data here (products and orders).
-
-It also comes in handy with integrity constraints that RDBMS provides so less additional check is required at the application level.
+I chose to use a SQL database (RDBMS) since mostly we are dealing with structured data here (products and orders). It also comes in handy with integrity constraints that RDBMS provides so less additional check is required at the application level.
 
 ### To Run the Service
 
