@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from auth import role_required
 from order import Order, ProductOutOfStock, InvalidProduct
+from user import MANAGER_ROLE, CUSTOMER_ROLE
 
 
 order_app = Blueprint('order_app', __name__)
@@ -10,7 +11,7 @@ order_app = Blueprint('order_app', __name__)
 
 @order_app.route('/create_order', methods=['POST'])
 @login_required
-@role_required('Customer')
+@role_required(CUSTOMER_ROLE)
 def create_order():
     
     product_names_and_quantities = []
@@ -37,12 +38,9 @@ def create_order():
 @order_app.route('/order_list')
 @login_required
 def get_order_list():
-    if current_user.role == 'Manager':
+    if current_user.role == MANAGER_ROLE:
         orders = Order.get_orders()
-    elif current_user.role == 'Customer':
-        orders = Order.get_orders(user_id=current_user.get_id())
     else:
-        current_user.logger.error(f'Got user with unknown role when handling order_list request. [user={current_user}]')
-        return 'Failed to get order list.', 500
+        orders = Order.get_orders(user_id=current_user.get_id())
 
     return jsonify([order.serialize() for order in orders]), 200

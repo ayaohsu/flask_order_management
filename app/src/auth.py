@@ -1,4 +1,4 @@
-from flask import request, Response, Blueprint, current_app
+from flask import request, Blueprint, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from functools import wraps
 
@@ -16,15 +16,15 @@ def login():
     user = get_user_by_username(username)
     if user is None:
         current_app.logger.info(f'Attempted to login with a non-existing username [username={username}]')
-        return Response('Username does not exist', status=400)
+        return 'Username does not exist', 400
 
     if bcrypt.check_password_hash(user.password_hash, password):
         login_user(user)
         current_app.logger.info(f'Logged user in successfully [user={user}]')
-        return Response('Logged in', status=201)
+        return 'Logged in', 201
     else:
          current_app.logger.info(f'Failed to log user in due to incorrect password [username={username}][input_password={password}]')
-         return Response('Login failed', status=400)
+         return 'Login failed', 400
 
 
 @auth_app.route('/logout', methods=['POST'])
@@ -33,7 +33,7 @@ def logout():
     user_id_to_logout = current_user.get_id()
     logout_user()
     current_app.logger.info(f'Logged out user successfully [user_id={user_id_to_logout}]')
-    return Response('Logged out', status=200)
+    return 'Logged out', 200
 
 
 @login_manager.user_loader

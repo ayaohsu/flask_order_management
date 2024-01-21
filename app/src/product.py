@@ -19,29 +19,17 @@ class Product:
     
     def update_to_db(self):
         connection = psycopg2.connect(**db_config)
-    
-        cursor = connection.cursor()
-        query_executed_successfully = True
-
-        try:
-            cursor.execute('''
-                UPDATE products
-                SET
-                price=%s,
-                stock=%s
-                WHERE id=%s
-            ''',
-            (self.price, self.stock, self.id)
-            )
-            connection.commit()
-        except Exception as e:
-            current_app.logger.error(f"Failed to update product to database. [exception={e}][product={self}]")
-            query_executed_successfully = False
-        finally:
-            cursor.close()
-            connection.close()
-        
-        return query_executed_successfully
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute('''
+                    UPDATE products
+                    SET
+                    price=%s,
+                    stock=%s
+                    WHERE id=%s
+                ''',
+                (self.price, self.stock, self.id))
+                connection.commit()
     
     def update_to_db_with_cursor(self, cursor):
         cursor.execute('''
@@ -51,121 +39,104 @@ class Product:
             stock=%s
             WHERE id=%s
         ''',
-        (self.price, self.stock, self.id)
-        )
+        (self.price, self.stock, self.id))
 
-def insert_product_to_db(name, price, stock):
-    connection = psycopg2.connect(**db_config)
-    
-    cursor = connection.cursor()
-    query_executed_successfully = True
+    @staticmethod
+    def insert_product_to_db(name, price, stock):
+        connection = psycopg2.connect(**db_config)
+        query_executed_successfully = True
+        with connection:
+            with connection.cursor() as cursor:
+        
+                try:
+                    cursor.execute('''
+                        INSERT INTO products
+                        (name, price, stock)
+                        VALUES 
+                        (%s, %s, %s)
+                    ''',
+                    (name, price, stock))
+                    connection.commit()
 
-    try:
+                except psycopg2.errors.UniqueViolation:
+                    current_app.logger.warn(f"Attempt to create a product with an existing name. [name={name}]")
+                    query_executed_successfully = False
+                    connection.rollback()
+
+        return query_executed_successfully
+
+    @staticmethod
+    def get_product_by_name(name):
+        connection = psycopg2.connect(**db_config)
+        with connection:
+            with connection.cursor() as cursor:
+        
+                cursor.execute('''
+                    SELECT id, name, price, stock 
+                    FROM products
+                    WHERE name = %s
+                ''',
+                (name,))
+
+                if cursor.rowcount == 0:
+                    return None
+                
+                product_record = cursor.fetchone()
+                return Product(*product_record)
+
+    @staticmethod
+    def get_product_by_name_with_cursor(cursor, name):
         cursor.execute('''
-            INSERT INTO products
-            (name, price, stock)
-            VALUES 
-            (%s, %s, %s)
+            SELECT id, name, price, stock 
+            FROM products
+            WHERE name = %s
         ''',
-        (name, price, stock)
-        )
-        connection.commit()
-    except psycopg2.errors.UniqueViolation:
-        current_app.logger.error(f"Attempt to create a product with an existing name. [name={name}]")
-        query_executed_successfully = False
-    finally:
-        cursor.close()
-        connection.close()
+        (name,))
 
-    return query_executed_successfully
+        if cursor.rowcount == 0:
+            return None
+        
+        product_record = cursor.fetchone()
 
-def get_product_by_name(name):
-    connection = psycopg2.connect(**db_config)
-    
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT id, name, price, stock 
-        FROM products
-        WHERE name = %s
-    ''',
-    (name,)
-    )
+        return Product(*product_record)
 
-    if cursor.rowcount == 0:
-        return None
-    
-    product_record = cursor.fetchone()
-    
-    cursor.close()
-    connection.close()
+    @staticmethod
+    def delete_product_from_db(name):
+        connection = psycopg2.connect(**db_config)
+        with connection:
+            with connection.cursor() as cursor:
+        
+                cursor.execute('''
+                    DELETE FROM products
+                    WHERE name=%s
+                ''',
+                (name,))
+                connection.commit()
 
-    return Product(product_record[0], product_record[1], product_record[2], product_record[3])
+    @staticmethod
+    def get_products_from_db(query_parameters):
+        connection = psycopg2.connect(**db_config)
+        with connection:
+            with connection.cursor() as cursor:
 
-def get_product_by_name_with_cursor(cursor, name):
-    cursor.execute('''
-        SELECT id, name, price, stock 
-        FROM products
-        WHERE name = %s
-    ''',
-    (name,)
-    )
+                cursor.execute('''
+                    SELECT id, name, price, stock
+                    FROM products
+                    WHERE price >= %(min_price)s AND price <= %(max_price)s
+                    AND stock >= %(min_stock)s AND stock <= %(max_stock)s
+                ''',
+                {
+                    'min_price': float(query_parameters['min_price']) if query_parameters['min_price'] is not None else 0,
+                    'max_price': float(query_parameters['max_price']) if query_parameters['max_price'] is not None else LARGE_ENOUGH_PRICE,
+                    'min_stock': int(query_parameters['min_stock']) if query_parameters['min_stock'] is not None else 0,
+                    'max_stock': int(query_parameters['max_stock']) if query_parameters['max_stock'] is not None else LARGE_ENOUGH_STOCK,
+                })
+                connection.commit()
 
-    if cursor.rowcount == 0:
-        return None
-    
-    product_record = cursor.fetchone()
+                product_records = cursor.fetchall()
+                products = []
 
-    return Product(product_record[0], product_record[1], product_record[2], product_record[3])
+                for product_record in product_records:
+                    products.append(Product(*product_record))
 
-def delete_product_from_db(name):
-    connection = psycopg2.connect(**db_config)
-
-    cursor = connection.cursor()
-    query_executed_successfully = True
-
-    try:
-        cursor.execute('''
-            DELETE FROM products
-            WHERE name=%s
-        ''',
-        (name,)
-        )
-        connection.commit()
-    except Exception as e:
-        current_app.logger.error(f"Failed to delete product from database. [exception={e}][name={name}]")
-        query_executed_successfully = False
-    finally:
-        cursor.close()
-        connection.close()
-
-    return query_executed_successfully
-
-def get_products_from_db(query_parameters):
-    connection = psycopg2.connect(**db_config)
-
-    cursor = connection.cursor()
-
-    cursor.execute('''
-        SELECT id, name, price, stock
-        FROM products
-        WHERE price >= %(min_price)s AND price <= %(max_price)s
-        AND stock >= %(min_stock)s AND stock <= %(max_stock)s
-    ''',
-    {
-        'min_price': float(query_parameters['min_price']) if query_parameters['min_price'] is not None else 0,
-        'max_price': float(query_parameters['max_price']) if query_parameters['max_price'] is not None else LARGE_ENOUGH_PRICE,
-        'min_stock': int(query_parameters['min_stock']) if query_parameters['min_stock'] is not None else 0,
-        'max_stock': int(query_parameters['max_stock']) if query_parameters['max_stock'] is not None else LARGE_ENOUGH_STOCK,
-    })
-    connection.commit()
-
-    product_records = cursor.fetchall()
-    products = []
-
-    for product_record in product_records:
-        products.append(Product(*product_record))
-
-    cursor.close()
-    connection.close()
-
-    return products
+        return products

@@ -3,6 +3,9 @@ import psycopg2
 
 from config import db_config
 
+MANAGER_ROLE = 'Manager'
+CUSTOMER_ROLE = 'Customer'
+
 class User(UserMixin):
 
     def __init__(self, id, username, password_hash, role):

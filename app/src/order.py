@@ -1,8 +1,7 @@
 import psycopg2
-from flask import current_app
 
 from config import db_config
-from product import get_product_by_name_with_cursor
+from product import Product
 
 
 class InvalidProduct(Exception):
@@ -41,7 +40,7 @@ class Order:
 
                 order_items = []
                 for product_name, order_quantity in product_names_and_quantities:
-                    product = get_product_by_name_with_cursor(cursor, product_name)
+                    product = Product.get_product_by_name_with_cursor(cursor, product_name)
                     if product is None:
                         connection.rollback()
                         raise InvalidProduct

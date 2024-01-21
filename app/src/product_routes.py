@@ -1,8 +1,9 @@
-from flask import Blueprint, current_app, Response, request
+from flask import Blueprint, current_app, request
 from flask_login import login_required
 
 from auth import role_required
-from product import insert_product_to_db, get_product_by_name, delete_product_from_db, get_products_from_db
+from product import Product
+from user import MANAGER_ROLE
 
 
 product_app = Blueprint('product_app', __name__)
@@ -10,7 +11,7 @@ product_app = Blueprint('product_app', __name__)
 
 @product_app.route('/create_product', methods=['POST'])
 @login_required
-@role_required('Manager')
+@role_required(MANAGER_ROLE)
 def create_product():
     name = request.form['name']
     price = request.form['price']
@@ -18,15 +19,15 @@ def create_product():
 
     current_app.logger.info(f"Received create product request with [name={name}][price={price}][stock={stock}]")
 
-    if insert_product_to_db(name, price, stock):
-        return Response("Product created.", 201)
+    if Product.insert_product_to_db(name, price, stock):
+        return "Product created.", 201
     else:
-        return Response("Failed to create product since it exists already.", 400)
+        return "Failed to create product since it exists already.", 400
 
 
 @product_app.route('/edit_product', methods=['POST'])
 @login_required
-@role_required('Manager')
+@role_required(MANAGER_ROLE)
 def edit_product():
     name = request.form['name']
     price = float(request.form['price'])
@@ -34,31 +35,28 @@ def edit_product():
 
     current_app.logger.info(f"Received edit product request with [name={name}][price={price}][stock={stock}]")
 
-    product = get_product_by_name(name)
+    product = Product.get_product_by_name(name)
     if product is None:
-        return Response("Product does not exist.", 400)
+        return "Product does not exist.", 400
     
     product.price = price
     product.stock = stock
 
-    if product.update_to_db():
-        return Response('Product updated.', 200)
-    else:
-        return Response('Failed to update product.', 500)
+    product.update_to_db()
+    return 'Product updated.', 200
 
 
-@product_app.route('/product', methods=['DELETE'])
+@product_app.route('/delete_product', methods=['DELETE'])
 @login_required
-@role_required('Manager')
+@role_required(MANAGER_ROLE)
 def delete_product():
     name = request.form['name']
 
     current_app.logger.info(f"Received delete product request with [name={name}]")
 
-    if delete_product_from_db(name):
-        return Response('Product deleted.', 200)
-    else:
-        return Response('Failed to delete product.', 500)
+    Product.delete_product_from_db(name)
+    return 'Product deleted.', 200
+
 
 @product_app.route('/product_list')
 def get_product_list():
@@ -69,6 +67,6 @@ def get_product_list():
         'max_stock': request.args.get('max-stock')
     }
 
-    products = get_products_from_db(products_query_parameters)
+    products = Product.get_products_from_db(products_query_parameters)
     product_names = [ product.name for product in products ]
     return product_names, 200
