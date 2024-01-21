@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, jsonify
 from flask_login import login_required
 
 from auth import role_required
@@ -17,12 +17,12 @@ def create_product():
     price = request.form['price']
     stock = request.form['stock']
 
-    current_app.logger.info(f"Received create product request with [name={name}][price={price}][stock={stock}]")
+    current_app.logger.info(f'Received create product request with [name={name}][price={price}][stock={stock}]')
 
     if Product.insert_product_to_db(name, price, stock):
-        return "Product created.", 201
+        return 'Product created.', 201
     else:
-        return "Failed to create product since it exists already.", 400
+        return 'Failed to create product since it exists already.', 400
 
 
 @product_app.route('/edit_product', methods=['POST'])
@@ -33,11 +33,11 @@ def edit_product():
     price = float(request.form['price'])
     stock = int(request.form['stock'])
 
-    current_app.logger.info(f"Received edit product request with [name={name}][price={price}][stock={stock}]")
+    current_app.logger.info(f'Received edit product request with [name={name}][price={price}][stock={stock}]')
 
     product = Product.get_product_by_name(name)
     if product is None:
-        return "Product does not exist.", 400
+        return 'Product does not exist.', 400
     
     product.price = price
     product.stock = stock
@@ -52,7 +52,7 @@ def edit_product():
 def delete_product():
     name = request.form['name']
 
-    current_app.logger.info(f"Received delete product request with [name={name}]")
+    current_app.logger.info(f'Received delete product request with [name={name}]')
 
     Product.delete_product_from_db(name)
     return 'Product deleted.', 200
@@ -68,5 +68,4 @@ def get_product_list():
     }
 
     products = Product.get_products_from_db(products_query_parameters)
-    product_names = [ product.name for product in products ]
-    return product_names, 200
+    return jsonify([product.serialize() for product in products]), 200

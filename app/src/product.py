@@ -17,6 +17,14 @@ class Product:
     def __repr__(self):
         return f'Product[id={self.id}][name={self.name}][price={self.price}][stock={self.stock}]'
     
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'stock': self.stock
+        }
+    
     def update_to_db(self):
         connection = psycopg2.connect(**db_config)
         with connection:
@@ -59,7 +67,7 @@ class Product:
                     connection.commit()
 
                 except psycopg2.errors.UniqueViolation:
-                    current_app.logger.warn(f"Attempt to create a product with an existing name. [name={name}]")
+                    current_app.logger.warn(f'Attempt to create a product with an existing name. [name={name}]')
                     query_executed_successfully = False
                     connection.rollback()
 
