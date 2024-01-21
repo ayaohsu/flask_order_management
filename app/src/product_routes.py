@@ -25,7 +25,7 @@ def create_product():
         return 'Failed to create product since it exists already.', 400
 
 
-@product_app.route('/edit_product', methods=['POST'])
+@product_app.route('/edit_product', methods=['PUT'])
 @login_required
 @role_required(MANAGER_ROLE)
 def edit_product():

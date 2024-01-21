@@ -5,6 +5,7 @@ from functools import wraps
 from user import get_user_by_id, get_user_by_username
 from app import bcrypt, login_manager
 
+
 auth_app = Blueprint('auth_app', __name__)
 
 

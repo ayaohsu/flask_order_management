@@ -62,13 +62,13 @@ class Order:
     
     @staticmethod
     def insert_order_to_db(cursor, user_id):
-        cursor.execute("""
+        cursor.execute('''
             INSERT INTO orders
             (user_id)
             VALUES
             (%s)
             RETURNING id
-        """, 
+        ''', 
         (user_id,))
         
         return cursor.fetchone()[0]
@@ -76,12 +76,12 @@ class Order:
     @staticmethod
     def insert_order_items_to_db(cursor, order_id, order_items):
         for product_id, order_quantity in order_items:    
-            cursor.execute("""
+            cursor.execute('''
                 INSERT INTO order_items
                 (order_id, product_id, quantity)
                 VALUES
                 (%s, %s, %s)
-            """,
+            ''',
         (order_id, product_id, order_quantity))
             
     @staticmethod
@@ -92,17 +92,17 @@ class Order:
         with connection:
             with connection.cursor() as cursor:
                 if (user_id is not None):
-                    cursor.execute("""
+                    cursor.execute('''
                         SELECT id, user_id
                         FROM orders
                         WHERE user_id=%s
-                    """,
+                    ''',
                     (user_id))
                 else:
-                    cursor.execute("""
+                    cursor.execute('''
                         SELECT id, user_id
                         FROM orders
-                    """)
+                    ''')
                 
                 order_records = cursor.fetchall()
 
@@ -111,12 +111,12 @@ class Order:
                     order_id = order_record[0]
                     order_user_id = order_record[1]
 
-                    cursor.execute("""
+                    cursor.execute('''
                         SELECT p.name, quantity
                         FROM order_items i, products p
                         WHERE i.product_id = p.id
                         AND order_id = %s
-                    """,
+                    ''',
                     (order_id,))
 
                     order_items = cursor.fetchall()

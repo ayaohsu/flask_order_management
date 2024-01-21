@@ -28,9 +28,9 @@ CREATE TABLE order_items (
 INSERT INTO users
 (id, username, password_hash, role)
 VALUES
-('1', 'manager01', '$2b$12$PVAArPGy0TlBfpULT5cShO6X4NToEqHU5r44ehPfut8NWQLBqrc0.', 'manager');
+('1', 'manager01', '$2b$12$PVAArPGy0TlBfpULT5cShO6X4NToEqHU5r44ehPfut8NWQLBqrc0.', 'Manager');
 
 INSERT INTO users 
 (id, username, password_hash, role)
 VALUES
-('2', 'customer01', '$2b$12$PQr/CiKJo8mt8uww4TxXmu1gP6gjPg61oGW81myWtJgVY5QgvKSMe', 'customer');
+('2', 'customer01', '$2b$12$PQr/CiKJo8mt8uww4TxXmu1gP6gjPg61oGW81myWtJgVY5QgvKSMe', 'Customer');
