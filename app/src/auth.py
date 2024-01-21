@@ -1,5 +1,6 @@
 from flask import request, Response, Blueprint, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from functools import wraps
 
 from user import get_user_by_id, get_user_by_username
 from app import bcrypt, login_manager
@@ -42,10 +43,11 @@ def load_user(user_id):
 
 def role_required(role):
     def decorator(func):
-        def wrapper(*args, **kwargs):
+        @wraps(func)
+        def check_user_role(*args, **kwargs):
             if current_user.role == role:
                 return func(*args, **kwargs)
             else:
                 raise PermissionError(f'Access denied for role [role={current_user.role}]')
-        return wrapper
+        return check_user_role
     return decorator

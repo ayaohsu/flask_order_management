@@ -1,11 +1,15 @@
 from flask import Blueprint, current_app, Response, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 import psycopg2
 
 from auth import role_required
 from config import db_config
 
+LARGE_ENOUGH_PRICE = 1e+10
+LARGE_ENOUGH_STOCK = 1e+10
+
 product_app = Blueprint('product_app', __name__)
+
 
 @product_app.route('/create_product', methods=['POST'])
 @login_required
@@ -61,7 +65,14 @@ def delete_product():
 
 @product_app.route('/product_list')
 def get_product_list():
-    products = get_all_products_from_db()
+    products_query_parameters = {
+        'min_price': float(request.args.get('min-price')) if request.args.get('min-price') is not None else 0,
+        'max_price': float(request.args.get('max-price')) if request.args.get('max-price') is not None else LARGE_ENOUGH_PRICE,
+        'min_stock': int(request.args.get('min-stock')) if request.args.get('min-stock') is not None else 0,
+        'max_stock': int(request.args.get('max-stock')) if request.args.get('max-stock') is not None else LARGE_ENOUGH_STOCK,
+    }
+
+    products = get_products_from_db(products_query_parameters)
     product_names = [ product.name for product in products ]
     return product_names, 200
 
@@ -172,7 +183,7 @@ def delete_product_from_db(name):
 
     return query_executed_successfully
 
-def get_all_products_from_db():
+def get_products_from_db(query_parameters):
     connection = psycopg2.connect(**db_config)
 
     cursor = connection.cursor()
@@ -180,7 +191,10 @@ def get_all_products_from_db():
     cursor.execute('''
         SELECT id, name, price, stock
         FROM products
-    ''')
+        WHERE price >= %(min_price)s AND price <= %(max_price)s
+        AND stock >= %(min_stock)s AND stock <= %(max_stock)s
+    ''',
+    query_parameters)
     connection.commit()
 
     product_records = cursor.fetchall()
