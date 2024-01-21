@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, request, jsonify
 from flask_login import login_required
 
 from auth import role_required
-from product import Product
+from product import Product, DeleteReferencedProduct
 from user import MANAGER_ROLE
 
 
@@ -54,8 +54,14 @@ def delete_product():
 
     current_app.logger.info(f'Received delete product request with [name={name}]')
 
-    Product.delete_product_from_db(name)
-    return 'Product deleted.', 200
+    try:
+        deleted_row_count = Product.delete_product_from_db(name)
+        if deleted_row_count == 1:
+            return 'Product deleted.', 200
+        else:
+            return 'No product was deleted.', 400
+    except DeleteReferencedProduct:
+        return 'Deleting a referenced product is not allowed.', 400
 
 
 @product_app.route('/product_list')

@@ -6,6 +6,11 @@ from config import db_config
 LARGE_ENOUGH_PRICE = 1e+10
 LARGE_ENOUGH_STOCK = 1e+10
 
+
+class DeleteReferencedProduct(Exception):
+    pass
+
+
 class Product:
 
     def __init__(self, id, name, price, stock):
@@ -113,13 +118,27 @@ class Product:
         connection = psycopg2.connect(**db_config)
         with connection:
             with connection.cursor() as cursor:
-        
-                cursor.execute('''
-                    DELETE FROM products
-                    WHERE name=%s
-                ''',
-                (name,))
-                connection.commit()
+                
+                try:
+                    cursor.execute('''
+                        DELETE FROM products
+                        WHERE name=%s
+                    ''',
+                    (name,))
+
+                except psycopg2.errors.ForeignKeyViolation:
+                    current_app.logger.warn(f'Attempted to delete a referenced product. [product_name={name}]')
+                    connection.rollback()
+                    raise DeleteReferencedProduct
+
+                deleted_row_count = cursor.rowcount
+                
+                if deleted_row_count == 0:
+                    connection.rollback()
+                else:
+                    connection.commit()
+
+                return deleted_row_count
 
     @staticmethod
     def get_products_from_db(query_parameters):
