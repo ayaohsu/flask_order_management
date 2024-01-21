@@ -35,11 +35,11 @@ python init_db.py
 
 | Method    | URI |  Request Parameters  |
 | -------- | ------- | ------- |
-| POST  | `/login`    | `username`, `password` (form-data)   |
+| POST  | `/login`    | fields: `username`, `password` (form-data)   |
 | POST  | `/logout`    |   |
-| POST  | `/create_product`    | `name`, `price`, `stock` (form-data) |
-| PUT  | `/edit_product`    | `name`, `price`, `stock` (form-data) |
-| DELETE  | `/delete_product`    | `name` (form-data) |
-| GET  | `/product_list`    | `min-price`, `max-price`, `min-stock`, `max-stock` (Query Params)  |
-| POST  | `/create_order`    | <product-name> <order-quantity> (form-data) |
+| POST  | `/create_product`    | fields: `name`, `price`, `stock` (form-data) |
+| PUT  | `/edit_product`    | fields: `name`, `price`, `stock` (form-data) |
+| DELETE  | `/delete_product`    | fields: `name` (form-data) |
+| GET  | `/product_list`    | fields (all are optional): `min-price`, `max-price`, `min-stock`, `max-stock` (query params)  |
+| POST  | `/create_order`    | key=product-name, value=order-quantity (form-data) |
 | GET  | `/order_list`    |  |
