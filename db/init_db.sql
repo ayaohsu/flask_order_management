@@ -12,6 +12,18 @@ CREATE TABLE products (
     stock INTEGER NOT NULL
 );
 
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR ( 10 ) REFERENCES users (id) NOT NULL,
+    created_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE order_items (
+    order_id INTEGER REFERENCES orders (id),
+    product_id INTEGER REFERENCES products (id),
+    quantity INTEGER NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
 
 INSERT INTO users
 (id, username, password_hash, role)

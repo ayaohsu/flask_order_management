@@ -42,6 +42,17 @@ class Product:
             connection.close()
         
         return query_executed_successfully
+    
+    def update_to_db_with_cursor(self, cursor):
+        cursor.execute('''
+            UPDATE products
+            SET
+            price=%s,
+            stock=%s
+            WHERE id=%s
+        ''',
+        (self.price, self.stock, self.id)
+        )
 
 def insert_product_to_db(name, price, stock):
     connection = psycopg2.connect(**db_config)
@@ -87,6 +98,22 @@ def get_product_by_name(name):
     
     cursor.close()
     connection.close()
+
+    return Product(product_record[0], product_record[1], product_record[2], product_record[3])
+
+def get_product_by_name_with_cursor(cursor, name):
+    cursor.execute('''
+        SELECT id, name, price, stock 
+        FROM products
+        WHERE name = %s
+    ''',
+    (name,)
+    )
+
+    if cursor.rowcount == 0:
+        return None
+    
+    product_record = cursor.fetchone()
 
     return Product(product_record[0], product_record[1], product_record[2], product_record[3])
 

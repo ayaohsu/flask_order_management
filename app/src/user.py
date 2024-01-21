@@ -12,7 +12,7 @@ class User(UserMixin):
         self.role = role
 
     def __repr__(self):
-        return f'User[id={self.id}][username={self.username}][password_hash={self.password_hash}][role={self.role}]'
+        return f'User[id={self.id}][username={self.username}][role={self.role}]'
 
 
 def get_user_by_id(id):
