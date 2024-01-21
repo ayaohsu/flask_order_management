@@ -19,9 +19,11 @@ class Order:
         self.user_id = user_id
         self.order_items = order_items
     
+
     def __repr__(self):
         return f'Order[id={self.id}][user_id={self.user_id}][product_list={self.order_items}]'
     
+
     def serialize(self):
         return {
             'id': self.id,
@@ -32,6 +34,7 @@ class Order:
             } for item in self.order_items]
         }
     
+
     @staticmethod
     def create_order(user_id, product_names_and_quantities):
         connection = psycopg2.connect(**db_config)
@@ -59,7 +62,8 @@ class Order:
                 connection.commit()
 
         return
-    
+
+
     @staticmethod
     def insert_order_to_db(cursor, user_id):
         cursor.execute('''
@@ -72,7 +76,8 @@ class Order:
         (user_id,))
         
         return cursor.fetchone()[0]
-    
+
+
     @staticmethod
     def insert_order_items_to_db(cursor, order_id, order_items):
         for product_id, order_quantity in order_items:    
@@ -83,7 +88,8 @@ class Order:
                 (%s, %s, %s)
             ''',
         (order_id, product_id, order_quantity))
-            
+
+
     @staticmethod
     def get_orders(user_id=None):
         connection = psycopg2.connect(**db_config)

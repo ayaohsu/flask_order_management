@@ -19,9 +19,11 @@ class Product:
         self.price = price
         self.stock = stock
 
+
     def __repr__(self):
         return f'Product[id={self.id}][name={self.name}][price={self.price}][stock={self.stock}]'
-    
+
+
     def serialize(self):
         return {
             'id': self.id,
@@ -29,7 +31,8 @@ class Product:
             'price': self.price,
             'stock': self.stock
         }
-    
+
+
     def update_to_db(self):
         connection = psycopg2.connect(**db_config)
         with connection:
@@ -43,7 +46,8 @@ class Product:
                 ''',
                 (self.price, self.stock, self.id))
                 connection.commit()
-    
+
+
     def update_to_db_with_cursor(self, cursor):
         cursor.execute('''
             UPDATE products
@@ -53,6 +57,7 @@ class Product:
             WHERE id=%s
         ''',
         (self.price, self.stock, self.id))
+
 
     @staticmethod
     def insert_product_to_db(name, price, stock):
@@ -78,6 +83,7 @@ class Product:
 
         return query_executed_successfully
 
+
     @staticmethod
     def get_product_by_name(name):
         connection = psycopg2.connect(**db_config)
@@ -97,6 +103,7 @@ class Product:
                 product_record = cursor.fetchone()
                 return Product(*product_record)
 
+
     @staticmethod
     def get_product_by_name_with_cursor(cursor, name):
         cursor.execute('''
@@ -112,6 +119,7 @@ class Product:
         product_record = cursor.fetchone()
 
         return Product(*product_record)
+
 
     @staticmethod
     def delete_product_from_db(name):
@@ -139,6 +147,7 @@ class Product:
                     connection.commit()
 
                 return deleted_row_count
+
 
     @staticmethod
     def get_products_from_db(query_parameters):

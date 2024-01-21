@@ -3,8 +3,10 @@ import psycopg2
 
 from config import db_config
 
+
 MANAGER_ROLE = 'Manager'
 CUSTOMER_ROLE = 'Customer'
+
 
 class User(UserMixin):
 
@@ -20,44 +22,37 @@ class User(UserMixin):
 
 def get_user_by_id(id):
     connection = psycopg2.connect(**db_config)
+    with connection:
+        with connection.cursor() as cursor:
     
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT id, username, password_hash, role 
-        FROM users
-        WHERE id = %s
-    ''',
-    (id,)
-    )
+            cursor.execute('''
+                SELECT id, username, password_hash, role 
+                FROM users
+                WHERE id = %s
+            ''',
+            (id,))
 
-    if cursor.rowcount == 0:
-        return None
-    
-    user_record = cursor.fetchone()
-    
-    cursor.close()
-    connection.close()
+            if cursor.rowcount == 0:
+                return None
+            
+            user_record = cursor.fetchone()
+            return User(*user_record)
 
-    return User(user_record[0], user_record[1], user_record[2], user_record[3])
 
 def get_user_by_username(username):
     connection = psycopg2.connect(**db_config)
-    
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT id, username, password_hash, role 
-        FROM users
-        WHERE username = %s
-    ''',
-    (username,)
-    )
+    with connection:
+        with connection.cursor() as cursor:
 
-    if cursor.rowcount == 0:
-        return None
-    
-    user_record = cursor.fetchone()
+            cursor.execute('''
+                SELECT id, username, password_hash, role 
+                FROM users
+                WHERE username = %s
+            ''',
+            (username,))
 
-    cursor.close()
-    connection.close()
-
-    return User(user_record[0], user_record[1], user_record[2], user_record[3])
+            if cursor.rowcount == 0:
+                return None
+            
+            user_record = cursor.fetchone()
+            return User(*user_record)
