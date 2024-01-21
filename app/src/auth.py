@@ -48,6 +48,6 @@ def role_required(role):
             if current_user.role == role:
                 return func(*args, **kwargs)
             else:
-                raise PermissionError(f'Access denied for role [role={current_user.role}]')
+                return f'Access denied for role [role={current_user.role}]', 401
         return check_user_role
     return decorator
