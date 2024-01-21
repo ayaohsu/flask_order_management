@@ -2,13 +2,13 @@
 
 ### Tech Stack
 
-This is an implementation of a product / order management service, using Flask and PostgreSQL, containerized by Docker.
+This is an implementation of a product and order management service, using Flask and PostgreSQL, containerized by Docker.
 
 I chose to use a SQL database (RDBMS) since mostly we are dealing with structured data here (products and orders). It also comes in handy with integrity constraints that RDBMS provides so less additional check is required at the application level.
 
 ### To Run the Service
 
-1. Clone the git repo to your local machine; Ensure docker environment is set up
+1. Clone the git repo to your local machine and make sure docker environment is set up
 
 2. Go to the directory and build the service by running
 ```
@@ -50,7 +50,18 @@ python init_db.py
 | GET  | `/order_list`    |  |
 
 
-### Notes
+### TODO List
 
-The validation of the request parameters is not implemented yet due to the time constraints - I haven't found a good way to do this except for manually checking the data type and range. I suspect there should be a library to validate this easily. However, I have yet to find one.
+The validation of the request parameters is not implemented yet - I haven't found a good way to do this except for manually checking the data type and range. I suspect there should be a library to validate this easily. However, I have yet to find one.
 
+At this time, all requests are simply responded with status codes and messages. I know HTML documents could have been returned so it will be easier to test and play around. Redirecting can also be implemented to make the user experience better, in cases like login failure.
+
+In my opinion it is also a good idea to include some unit tests (perhaps with pytest) and some end-to-end tests to test the real-life use cases like login and logout, role-based access control, product life cycle, etc. 
+
+### Contact
+
+If there is any question, please do not hesitate to contact me.
+Thank you for your review!
+
+Yao Hsu  
+ayao780607@gmail.com
